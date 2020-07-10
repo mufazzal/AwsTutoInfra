@@ -1,0 +1,300 @@
+AWSTemplateFormatVersion: 2010-09-09
+Metadata:
+  'AWS::CloudFormation::Designer':
+    31d8e495-77d4-4b71-939a-d93908551af3:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 60
+        'y': 90
+      z: 1
+      embeds: []
+    fa444bcf-9493-49b6-8b5d-3b2cbbf5496e:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 270
+        'y': 90
+      z: 1
+      embeds: []
+    369546d4-9830-44a9-87f8-f538b220696e:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 150
+        'y': 90
+      z: 1
+      embeds: []
+      isassociatedwith:
+        - 31d8e495-77d4-4b71-939a-d93908551af3
+    b40dca93-ff48-4bfa-8b4e-90a67630cc0e:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 420
+        'y': 90
+      z: 1
+      embeds: []
+      isassociatedwith:
+        - fa444bcf-9493-49b6-8b5d-3b2cbbf5496e
+    fa44f40e-13a9-4dd4-bf84-442edbf6b392:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 720
+        'y': 90
+      z: 1
+      embeds: []
+    a9b7fbbf-e77b-4a1e-983c-c8894ba97811:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 540
+        'y': 30
+      z: 1
+      embeds: []
+    6e6bec94-1174-40cc-981a-f79b983e3638:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 540
+        'y': 120
+      z: 1
+      embeds: []
+      isassociatedwith:
+        - fa44f40e-13a9-4dd4-bf84-442edbf6b392
+    b4054a90-f747-4f0b-a167-81f821a7a17e:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 60
+        'y': 180
+      z: 1
+      embeds: []
+    0858a898-238f-4128-af5e-3eaf3d084a8d:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 150
+        'y': 180
+      z: 1
+      embeds: []
+Resources:
+  AWSTutoDevopsPolicy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: AWSTutoDevopsPolicy-inline
+      Groups:
+        - !Ref AWSTutoDevopsUserGroup
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: myIds
+            Effect: Allow
+            Action:
+              - 'S3:Upload'
+            Resource: !Join 
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref BuildRepository
+                - /*
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 369546d4-9830-44a9-87f8-f538b220696e
+  AWSTutoDevopsUserGroup:
+    Type: 'AWS::IAM::Group'
+    Properties:
+      GroupName: AWSTutoDevopsUsers
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 31d8e495-77d4-4b71-939a-d93908551af3
+  AWSTutoCodeDeployRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Description: Role for Codedeploy to assume for deployment
+      RoleName: AWSTutoCodeDeployRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service:
+                - codedeploy.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole'
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: a9b7fbbf-e77b-4a1e-983c-c8894ba97811
+  BuildRepository:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: aws-tuto-build-repo-2020-muf
+      AccessControl: PublicRead
+      VersioningConfiguration:
+        Status: Enabled
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: fa444bcf-9493-49b6-8b5d-3b2cbbf5496e
+  AwsTutoCodePipelineRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+        Version: 2012-10-17
+      Path: /
+      Policies:
+        - PolicyName: CodePipelineAccess
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - 's3:*'
+                  - 'cloudformation:CreateStack'
+                  - 'cloudformation:DescribeStacks'
+                  - 'cloudformation:DeleteStack'
+                  - 'cloudformation:UpdateStack'
+                  - 'cloudformation:CreateChangeSet'
+                  - 'cloudformation:ExecuteChangeSet'
+                  - 'cloudformation:DeleteChangeSet'
+                  - 'cloudformation:DescribeChangeSet'
+                  - 'cloudformation:SetStackPolicy'
+                  - 'iam:PassRole'
+                  - 'sns:Publish'
+                Effect: Allow
+                Resource: '*'
+              - Action:
+                  - 'codedeploy:CreateDeployment'
+                  - 'codedeploy:GetApplication'
+                  - 'codedeploy:GetApplicationRevision'
+                  - 'codedeploy:GetDeployment'
+                  - 'codedeploy:GetDeploymentConfig'
+                  - 'codedeploy:RegisterApplicationRevision'
+                Effect: Allow
+                Resource: '*'                
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: b4054a90-f747-4f0b-a167-81f821a7a17e
+  AWSTutoRepoBucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref BuildRepository
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: myIds11
+            Principal: '*'
+            Effect: Allow
+            Action: '*'
+            Resource: !Join 
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref BuildRepository
+                - /*
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: b40dca93-ff48-4bfa-8b4e-90a67630cc0e
+  AwsTutoFrontEndCodeDeployApp:
+    Type: 'AWS::CodeDeploy::Application'
+    Properties:
+      ApplicationName: FrontEndBuild
+      ComputePlatform: Server
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: fa44f40e-13a9-4dd4-bf84-442edbf6b392
+  AwsTutoCodeDeployGroup:
+    Type: 'AWS::CodeDeploy::DeploymentGroup'
+    Properties:
+      ApplicationName: !Ref AwsTutoFrontEndCodeDeployApp
+      ServiceRoleArn: !GetAtt 
+        - AWSTutoCodeDeployRole
+        - Arn
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 6e6bec94-1174-40cc-981a-f79b983e3638
+  AwsTutoCodeDeployPipeLine:
+    Type: 'AWS::CodePipeline::Pipeline'
+    Properties:
+      Name: AwsTutoCodeDeployPipeLine
+      ArtifactStore:
+        Type: S3
+        Location: !Ref BuildRepository
+      RoleArn: !GetAtt 
+        - AwsTutoCodePipelineRole
+        - Arn
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: SourceAction
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Version: 1
+                Provider: S3
+              OutputArtifacts:
+                - Name: SourceOutput
+              Configuration:
+                S3Bucket: !Ref BuildRepository
+                S3ObjectKey: !Ref BuildObjecKey
+              RunOrder: 1
+        - Name: Beta
+          Actions:
+            - Name: BetaAction
+              InputArtifacts:
+                - Name: SourceOutput
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CodeDeploy
+              Configuration:
+                ApplicationName: !Ref AwsTutoFrontEndCodeDeployApp
+                DeploymentGroupName: !Ref AwsTutoCodeDeployGroup
+              RunOrder: 1
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 0858a898-238f-4128-af5e-3eaf3d084a8d
+Outputs:
+  RefAWSTutoDevopsUserGroup:
+    Description: Ref of AWSTutoDevopsUserGroup
+    Value: !Ref AWSTutoDevopsUserGroup
+  RefBuildRepository:
+    Description: Ref of BuildRepository
+    Value: !Ref BuildRepository
+  RefAWSTutoDevopsPolicy:
+    Description: Ref of AWSTutoDevopsPolicy
+    Value: !Ref AWSTutoDevopsPolicy
+  RefAWSTutoRepoBucketPolicy:
+    Description: Ref of AWSTutoRepoBucketPolicy
+    Value: !Ref AWSTutoRepoBucketPolicy
+  RefAwsTutoFrontEndCodeDeployApp:
+    Description: Ref of AwsTutoFrontEndCodeDeployApp
+    Value: !Ref AwsTutoFrontEndCodeDeployApp
+  RefAWSTutoCodeDeployRole:
+    Description: Ref of AWSTutoCodeDeployRole
+    Value: !Ref AWSTutoCodeDeployRole
+  RefAwsTutoCodeDeployGroup:
+    Description: Ref of AwsTutoCodeDeployGroup
+    Value: !Ref AwsTutoCodeDeployGroup
+  RefAwsTutoCodeDeployPipeLine:
+    Description: Ref of AwsTutoCodeDeployPipeLine
+    Value: !Ref AwsTutoCodeDeployPipeLine
+Parameters:
+  BuildObjecKey:
+    Type: String
