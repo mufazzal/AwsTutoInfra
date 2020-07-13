@@ -225,6 +225,21 @@ Resources:
       ServiceRoleArn: !GetAtt 
         - AWSTutoCodeDeployRole
         - Arn
+      AutoRollbackConfiguration:
+        Enabled: true
+        Events: 
+          - DEPLOYMENT_FAILURE
+          - DEPLOYMENT_STOP_ON_REQUEST
+          - DEPLOYMENT_STOP_ON_ALARM
+      AutoScalingGroups: 
+          - !Ref FrontEndAutoScalingGroup
+      DeploymentStyle:
+          DeploymentType: IN_PLACE
+          DeploymentOption: WITH_TRAFFIC_CONTROL
+      LoadBalancerInfo:
+        TargetGroupInfoList:
+          - Name: !Ref FrontEndELBTG
+      DeploymentConfigName: 'CodeDeployDefault.AllAtOnce'
     Metadata:
       'AWS::CloudFormation::Designer':
         id: 6e6bec94-1174-40cc-981a-f79b983e3638
@@ -253,9 +268,9 @@ Resources:
                 S3Bucket: !Ref BuildRepository
                 S3ObjectKey: !Ref BuildObjecKey
               RunOrder: 1
-        - Name: Beta
+        - Name: DeployToEC2
           Actions:
-            - Name: BetaAction
+            - Name: DeployToEC2Action
               InputArtifacts:
                 - Name: SourceOutput
               ActionTypeId:
@@ -297,4 +312,8 @@ Outputs:
     Value: !Ref AwsTutoCodeDeployPipeLine
 Parameters:
   BuildObjecKey:
+    Type: String
+  FrontEndAutoScalingGroup:
+    Type: String
+  FrontEndELBTG:
     Type: String

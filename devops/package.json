@@ -1,0 +1,22 @@
+{
+  "name": "devops",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "node scripts/tasks deploy mufazzalStack codeDeployArtifactFinal.zip EC2withCodeDeployGroup MyNodeEC2Targets",
+    "validate": "node scripts/tasks validate",
+    "pollEvent": "node scripts/tasks pollEvent mufazzalStack",
+    "delete": "node scripts/tasks delete mufazzalStack",
+    "listResource": "node scripts/tasks listResource mufazzalStack",
+    "describe": "node scripts/tasks describe mufazzalStack"
+    
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "moment": "^2.27.0"
+  }
+}

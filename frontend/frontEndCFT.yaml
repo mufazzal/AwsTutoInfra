@@ -190,3 +190,31 @@ Mappings:
   RegionMap:
     us-east-1:
       AMI: ami-0323c3dd2da7fb37d
+
+Outputs:
+  RefALBSG:
+    Description: Ref of ALBSG
+    Value: !Ref ALBSG    
+  RefEC2SG:
+    Description: Ref of EC2SG
+    Value: !Ref EC2SG       
+  RefEC2LAunchConfig:
+    Description: Ref of EC2LAunchConfig
+    Value: !Ref EC2LAunchConfig       
+  RefASGEC2:
+    Description: Ref of ASGEC2
+    Value: !Ref ASGEC2    
+  RefLBTRG:
+    Description: Ref of LBTRG
+    Value: !Ref LBTRG  
+  RefLBLIS:
+    Description: Ref of LBLIS
+    Value: !Ref LBLIS     
+  RefMALB:
+    Description: Ref of MALB
+    Value: !Ref MALB
+  ALBDNSNAme:
+    Description: DNS name of ALB
+    Value: !GetAtt
+      - MALB
+      - DNSName
