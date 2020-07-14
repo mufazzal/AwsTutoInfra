@@ -239,7 +239,7 @@ Resources:
       LoadBalancerInfo:
         TargetGroupInfoList:
           - Name: !Ref FrontEndELBTG
-      DeploymentConfigName: 'CodeDeployDefault.AllAtOnce'
+      DeploymentConfigName: 'CodeDeployDefault.OneAtATime'
     Metadata:
       'AWS::CloudFormation::Designer':
         id: 6e6bec94-1174-40cc-981a-f79b983e3638
