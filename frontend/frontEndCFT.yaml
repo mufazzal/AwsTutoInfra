@@ -168,8 +168,9 @@ Parameters:
   MufVPCID:
     Type: 'AWS::EC2::VPC::Id'
   MufSubnetIdForWebServers:
-    Type: 'List<AWS::EC2::Subnet::Id>'
-    MinLength: 2
+    Type: CommaDelimitedList
+#    Type: 'List<AWS::EC2::Subnet::Id>'
+#    MinLength: 2
     Description: >-
       Select the Subnet for EC2 WebServer(This is behind LB so private subnet is
       more secure)

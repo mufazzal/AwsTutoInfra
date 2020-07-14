@@ -3,9 +3,6 @@ const config = {
     key_bundleObjectKey: 'BuildObjecKey',
     key_asg: 'FrontEndAutoScalingGroup',
     key_lb: 'FrontEndELBTG',
-    value_bundleObjectKey: '',
-    value_asg: '',
-    value_lb: '',
 }
 
 const buildParamPairForStackCreation = (args) => {
