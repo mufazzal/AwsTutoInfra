@@ -1,0 +1,345 @@
+AWSTemplateFormatVersion: 2010-09-09
+Metadata:
+  'AWS::CloudFormation::Designer':
+    6d4780ef-36c0-4e7a-a1cb-487d30f9c71d:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 380
+        'y': 110
+      z: 1
+      embeds: []
+    1428fb0a-0518-44b8-b42b-14acc208b16b:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 380
+        'y': 210
+      z: 1
+      embeds: []
+    c9902027-40b9-402e-9164-1d0f6f5ee1fe:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 210
+        'y': 260
+      z: 1
+      embeds: []
+      isassociatedwith:
+        - 1428fb0a-0518-44b8-b42b-14acc208b16b
+    ce2f77ab-2340-4f5d-a084-33ff7d068236:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 600
+        'y': 100
+      z: 1
+      embeds: []
+      isassociatedwith:
+        - 6d4780ef-36c0-4e7a-a1cb-487d30f9c71d
+    7872ed8e-6a4a-463f-b631-3186cb0ae731:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 60
+        'y': 50
+      z: 1
+      embeds: []
+      isassociatedwith:
+        - ce2f77ab-2340-4f5d-a084-33ff7d068236
+    e4f5012b-8ad6-487e-972f-4f73dbf21dc6:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: -160
+        'y': 180
+      z: 1
+      embeds: []
+    fe6c4a5a-d0d9-4ba0-bc74-fc88d76834c3:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 10
+        'y': 250
+      z: 1
+      embeds: []
+      isassociatedwith:
+        - c9902027-40b9-402e-9164-1d0f6f5ee1fe
+        - e4f5012b-8ad6-487e-972f-4f73dbf21dc6
+
+Resources:
+    S3TutoPublicBucket:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        BucketName: !Join 
+          - ''
+          - - !Ref BucketPrefix
+            - '-acl-publicread'
+        AccessControl: PublicRead
+      Metadata:
+        'AWS::CloudFormation::Designer':
+          id: fa444bcf-9493-49b6-8b5d-3b2cbbf5496e
+
+    S3TutoPrivateBucket:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        BucketName: !Join 
+          - ''
+          - - !Ref BucketPrefix
+            - '-acl-private'
+        AccessControl: Private  #By default it is set to be private.
+      Metadata:
+        'AWS::CloudFormation::Designer':
+          id: fa444bcf-9493-49b6-8b5d-3b2cbbf5496e
+
+    S3TutoPublicRWBucket:
+      Type: 'AWS::S3::Bucket'
+      DependsOn:
+            - SNSTopicPolicy
+            - SQSQeuePolicy
+      Properties:
+        BucketName: !Join 
+          - ''
+          - - !Ref BucketPrefix
+            - '-acl-public-rw'
+        AccessControl: PublicReadWrite
+        VersioningConfiguration:
+          Status: Enabled        
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins: 
+                - "*"
+              AllowedMethods: 
+                - POST
+                - GET
+                - PUT
+                - DELETE
+                - HEAD
+              AllowedHeaders: 
+                - "*"        
+        MetricsConfigurations: 
+          - Id: fol1Graphs
+            Prefix: 'fol/'
+          - Id: ofTag
+            TagFilters:
+              - Key: 'dep'
+                Value: 'operation'                          
+        LoggingConfiguration:
+          DestinationBucketName: !Ref S3LogBucket
+          LogFilePrefix: 'S3TutoPublicRWBucket/'   
+        LifecycleConfiguration:
+            Rules:
+              - Id: DeleteContentAfter1Day
+                Status: 'Enabled'
+              # Prefix: "private/"
+                Transition:
+                  StorageClass: "GLACIER"
+                  TransitionInDays: 1                  
+                ExpirationInDays: 2
+                NoncurrentVersionTransition: 
+                  StorageClass: "GLACIER"
+                  TransitionInDays: 1               
+                NoncurrentVersionExpirationInDays: 2
+        NotificationConfiguration:
+          TopicConfigurations:
+            - Event: s3:ObjectCreated:*
+              Topic: !Ref S3SNS
+            - Event: s3:ObjectRemoved:*
+              Topic: !Ref S3SNS
+              # Filter: 
+              #    S3Key: 
+              #     Rules:
+              #       - Name: "prefix"
+              #         Value: "private/"
+          QueueConfigurations:
+            - Event: s3:ObjectRestore:Post
+              Queue: !GetAtt S3SQS.Arn   
+              Filter: 
+                 S3Key: 
+                  Rules:
+                    - Name: "prefix"
+                      Value: "private/"                                
+        AccelerateConfiguration:
+          AccelerationStatus: Enabled
+#--------Monitering------------
+    S3LogBucket:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        BucketName: !Join 
+          - ''
+          - - !Ref BucketPrefix
+            - '-log-bucket'
+        AccessControl: LogDeliveryWrite
+    TrailLogBucket:
+        Type: "AWS::S3::Bucket"
+        Properties:
+          BucketName: !Join 
+          - ''
+          - - !Ref BucketPrefix
+            - '-trail-log-bucket'
+    TrailLogBucketPolicy:
+        Type: "AWS::S3::BucketPolicy"
+        Properties:
+          Bucket: !Ref TrailLogBucket
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+            - Effect: Allow
+              Principal:
+                Service: "cloudtrail.amazonaws.com"
+              Action: "s3:GetBucketAcl"
+              Resource: "arn:aws:s3:::muf-aws-tuto-trail-log-bucket"
+            - Effect: Allow
+              Principal:
+                Service: "cloudtrail.amazonaws.com"
+              Action: "s3:PutObject"
+              Resource: "arn:aws:s3:::muf-aws-tuto-trail-log-bucket/AWSLogs/388412347424/*"
+              Condition:
+                StringEquals:
+                  "s3:x-amz-acl": "bucket-owner-full-control"    
+    CloudTrailTrail:
+      Type: "AWS::CloudTrail::Trail"
+      DependsOn:
+        - TrailLogBucketPolicy
+      Properties:
+        IsLogging: true
+        S3BucketName: !Ref TrailLogBucket
+        IsMultiRegionTrail: true
+        IncludeGlobalServiceEvents: true
+        TrailName: "mufTrail"
+        CloudWatchLogsLogGroupArn:
+          Fn::GetAtt:
+            - CloudTrailCloudWatchLogGroup
+            - Arn
+        CloudWatchLogsRoleArn:
+          Fn::GetAtt:
+            - IamRoleForCwLogs
+            - Arn
+        EventSelectors:
+          - DataResources:
+            - Type: "AWS::S3::Object"
+              Values: 
+                - "arn:aws:s3:::muf-aws-tuto-acl-public-rw/"
+            IncludeManagementEvents: true
+            ReadWriteType: All
+    CloudTrailCloudWatchLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties: 
+        LogGroupName: "CloudTrailCloudWatchLogGroup"
+        RetentionInDays: 3
+    IamRoleForCwLogs:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Sid: ''
+              Effect: Allow
+              Principal:
+                Service: cloudtrail.amazonaws.com
+              Action: 'sts:AssumeRole'
+        Policies:
+          - PolicyName: allow-access-to-cw-logs
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - 'logs:CreateLogStream'
+                    - 'logs:PutLogEvents'
+                  Resource: '*'
+
+#--------Monitering END------------
+ 
+#--------SNS Notification------------
+
+    S3SNS:
+      Type: AWS::SNS::Topic
+      Properties: 
+        DisplayName: SNS for S3 tuto
+        #TopicName: S3SNS
+    SNSTopicPolicy:
+        Type: AWS::SNS::TopicPolicy
+        DependsOn:
+              - S3SNS        
+        Properties:
+          Topics:
+            - !Ref S3SNS
+          PolicyDocument:
+            Id: SNSTopicPolicy
+            Version: '2012-10-17'
+            Statement:
+              -
+                Sid: S3TriggerAccess12
+                Effect: Allow
+                Principal:
+                  AWS:
+                    - '*'
+                  Service: 
+                    - "s3.amazonaws.com"
+                Action:
+                  - sns:Publish
+                Resource:
+                  - !Ref S3SNS
+                Condition:
+                  ArnLike:
+                    aws:SourceArn: !Join 
+                                    - ''
+                                    - - 'arn:aws:s3:::'
+                                      - !Ref BucketPrefix
+                                      - '-acl-public-rw'
+
+    S3SQS:
+      Type: AWS::SQS::Queue
+      #Properties:
+        #QueueName: MufSQS-${opt:stage}
+    SQSQeuePolicy:
+        Type: AWS::SQS::QueuePolicy
+        DependsOn:
+              - S3SQS              
+        Properties:
+          Queues:
+            - !Ref S3SQS
+          PolicyDocument:
+            Id: SQSQeuePolicy
+            Version: '2012-10-17'
+            Statement:
+              -
+                Sid: S3TriggerAccess
+                Effect: Allow
+                Principal:
+                  AWS:
+                    - '*'
+                  Service: 
+                    - "s3.amazonaws.com"                    
+                Action:
+                  - SQS:SendMessage
+                Resource:
+                  - !GetAtt S3SQS.Arn
+                Condition:
+                  ArnLike:
+                    aws:SourceArn: !Join 
+                                    - ''
+                                    - - 'arn:aws:s3:::'
+                                      - !Ref BucketPrefix
+                                      - '-acl-public-rw'
+
+#--------SNS Notification END------------
+
+
+Parameters:
+  BucketPrefix:
+    Type: String
+
+Outputs:
+ S3SNSRef:
+  Value: !Ref S3SNS
+#  S3SQSRef:
+#   Value: !Ref S3SQS  

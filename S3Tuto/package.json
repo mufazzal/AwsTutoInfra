@@ -1,0 +1,22 @@
+{
+  "name": "s3tutoinfra",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "node scripts/tasks deploy S3TutoStack",
+    "update": "node scripts/tasks update S3TutoStack",
+    "validate": "node scripts/tasks validate",
+    "pollEvent": "node scripts/tasks pollEvent S3TutoStack",
+    "delete": "node scripts/tasks delete S3TutoStack",
+    "listResource": "node scripts/tasks listResource S3TutoStack",
+    "describe": "node scripts/tasks describe S3TutoStack"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "moment": "^2.27.0"
+  }
+}
