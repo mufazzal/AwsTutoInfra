@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  ALBSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SG for ALB
+      VpcId: !Ref MufVPCID
+      SecurityGroupIngress:
+        FromPort: 80
+        ToPort: 80
+        IpProtocol: TCP
+        CidrIp: 0.0.0.0/0
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 6d4780ef-36c0-4e7a-a1cb-487d30f9c71d
+  EC2SG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SG for EC2
+      VpcId: !Ref MufVPCID
+      SecurityGroupIngress:
+        FromPort: 80
+        ToPort: 80
+        IpProtocol: TCP
+        SourceSecurityGroupId: !GetAtt 
+          - ALBSG
+          - GroupId
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 1428fb0a-0518-44b8-b42b-14acc208b16b
+Parameters:
+  MufVPCID:
+    Type: 'AWS::EC2::VPC::Id'
+
+Outputs:
+  RefEC2SG:
+    Description: Ref of EC2SG
+    Value: !Ref EC2SG       
+  RefALBSG:
+    Description: Ref of ALBSG
+    Value: !Ref ALBSG        

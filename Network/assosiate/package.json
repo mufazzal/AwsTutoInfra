@@ -1,0 +1,22 @@
+{
+  "name": "networkInfra",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "node scripts/tasks deploy mainVPCAssosiateCompStack",
+    "update": "node scripts/tasks update mainVPCAssosiateCompStack",
+    "validate": "node scripts/tasks validate",
+    "pollEvent": "node scripts/tasks pollEvent AwsTutoFrontEndStack",
+    "delete": "node scripts/tasks delete mainVPCAssosiateCompStack",
+    "listResource": "node scripts/tasks listResource AwsTutoFrontEndStack",
+    "describe": "node scripts/tasks describe AwsTutoFrontEndStack"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "moment": "^2.27.0"
+  }
+}

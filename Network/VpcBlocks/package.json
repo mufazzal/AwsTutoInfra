@@ -1,11 +1,12 @@
 {
-  "name": "frontEndeInfra",
+  "name": "networkInfra",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "node scripts/tasks deploy AwsTutoFrontEndStack",
+    "deploy": "node scripts/tasks deploy mainVPCStack",
+    "update": "node scripts/tasks update mainVPCStack",
     "validate": "node scripts/tasks validate",
     "pollEvent": "node scripts/tasks pollEvent AwsTutoFrontEndStack",
     "delete": "node scripts/tasks delete AwsTutoFrontEndStack",

@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  ASGEC2:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      AutoScalingGroupName: ASG_for_EC2
+      LaunchConfigurationName: !Ref EC2LAunchConfig
+      MaxSize: 3
+      MinSize: 1
+      VPCZoneIdentifier: !Ref MufSubnetIdForWebServers
+      TargetGroupARNs:
+        - !Ref LBTRG
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: fe6c4a5a-d0d9-4ba0-bc74-fc88d76834c3
+Parameters:
+  MufVPCID:
+    Type: 'AWS::EC2::VPC::Id'
+  MufSubnetIdForWebServers:
+    Type: CommaDelimitedList
+#    Type: 'List<AWS::EC2::Subnet::Id>'
+#    MinLength: 2
+    Description: >-
+      Select the Subnet for EC2 WebServer(This is behind LB so private subnet is
+      more secure)
+  LBTRG:
+    Type: String
+  EC2LAunchConfig:
+    Type: String
+
+
+Outputs:
+  RefASGEC2:
+    Description: Ref of ASGEC2
+    Value: !Ref ASGEC2       
