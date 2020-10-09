@@ -17,7 +17,7 @@ const config = {
     value_RouteTableForPublicSubnets: 'rtb-05a0420e3d84a48de',    
 
     key_RouteTableForPrivateSubnet1: 'RouteTableForPrivateSubnet1',
-    value_outeTableForPrivateSubnet1: 'rtb-0b92c184c2a880565',     
+    value_RouteTableForPrivateSubnet1: 'rtb-0b92c184c2a880565',     
 
     key_RouteTableForPrivateSubnet2: 'RouteTableForPrivateSubnet2',
     value_RouteTableForPrivateSubnet2: 'rtb-0f311d28f10f983dd',    
@@ -37,7 +37,7 @@ const buildParamPairForStackCreation = (args) => {
         { ParameterKey: config.key_PrivateSubnet2, ParameterValue: config.value_PrivateSubnet2},
 
         { ParameterKey: config.key_RouteTableForPublicSubnets, ParameterValue: config.value_RouteTableForPublicSubnets},
-        { ParameterKey: config.key_RouteTableForPrivateSubnet1, ParameterValue: config.value_outeTableForPrivateSubnet1},
+        { ParameterKey: config.key_RouteTableForPrivateSubnet1, ParameterValue: config.value_RouteTableForPrivateSubnet1},
         { ParameterKey: config.key_RouteTableForPrivateSubnet2, ParameterValue: config.value_RouteTableForPrivateSubnet2},
     
     ]
