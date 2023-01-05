@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  EC2WebServerIAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: EC2WebServerIAMRolePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - 'cloudformation:DescribeStackResource'
+                  - 'cloudformation:SignalResource'
+                Resource: '*'
+  EC2WebServerIAMRoleInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref EC2WebServerIAMRole
+
+Outputs:
+  RefEC2WebServerIAMRole:
+    Description: Ref of EC2WebServerIAMRole
+    Value: !Ref EC2WebServerIAMRole
+  RefEC2WebServerIAMRoleInstanceProfile:
+    Description: Ref of EC2WebServerIAMRoleInstanceProfile
+    Value: !Ref EC2WebServerIAMRoleInstanceProfile    

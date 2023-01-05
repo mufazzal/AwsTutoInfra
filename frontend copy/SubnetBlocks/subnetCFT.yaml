@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  MainVPC:
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: !Ref VpcCIDRBlock
+  PublicSubnet1:    
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: !Ref publicSubnet1AZ
+      CidrBlock: !Ref publicSubnet1CIDRBlock 
+      VpcId: !Ref MainVPC
+  PublicSubnet2:    
+      Type: AWS::EC2::Subnet
+      Properties: 
+        AvailabilityZone: !Ref publicSubnet2AZ
+        CidrBlock: !Ref publicSubnet2CIDRBlock 
+        VpcId: !Ref MainVPC
+  privateSubnet1:    
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: !Ref privateSubnet1AZ
+      CidrBlock: !Ref privateSubnet1CIDRBlock 
+      VpcId: !Ref MainVPC
+  privateSubnet2:    
+      Type: AWS::EC2::Subnet
+      Properties: 
+        AvailabilityZone: !Ref privateSubnet2AZ
+        CidrBlock: !Ref privateSubnet2CIDRBlock 
+        VpcId: !Ref MainVPC   
+  internallyIsolatedSubnet:    
+      Type: AWS::EC2::Subnet
+      Properties: 
+        AvailabilityZone: !Ref internallyIsolatedSubnetAZ
+        CidrBlock: !Ref internallyIsolatedSubnetCIDRBlock 
+        VpcId: !Ref MainVPC                 
+
+Parameters:
+  VpcCIDRBlock:
+    Description: VPC CIDR Block
+    Type: String
+  publicSubnet1AZ:
+    Description: Public Subnet1 AZ
+    Type: String
+  publicSubnet2AZ:
+    Description: Public Subnet2 AZ
+    Type: String
+  publicSubnet1CIDRBlock:
+    Description: Public Subnet1 CIDR Block
+    Type: String
+  publicSubnet2CIDRBlock:
+    Description: Public Subnet2 CIDR Block
+    Type: String
+  privateSubnet1AZ:
+    Description: private Subnet1 AZ
+    Type: String
+  privateSubnet2AZ:
+    Description: private Subnet2 AZ
+    Type: String
+  privateSubnet1CIDRBlock:
+    Description: private Subnet1 CIDR Block
+    Type: String
+  privateSubnet2CIDRBlock:
+    Description: private Subnet2 CIDR Block
+    Type: String 
+  internallyIsolatedSubnetAZ:
+    Description: internally Isolated Subnet AZ
+    Type: String
+  internallyIsolatedSubnetCIDRBlock:
+    Description: internally Isolated Subnet CIDR Block
+    Type: String
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-0323c3dd2da7fb37d
+
+Outputs:
+  MainVPC:
+    Description: MainVPC
+    Value: !Ref MainVPC
+  MainVPCNACL:
+    Description: MainVPC default NACL
+    Value: !GetAtt
+      - MainVPC
+      - DefaultNetworkAcl
+  MainVPCSG:
+    Description: MainVPC default SG
+    Value: !GetAtt
+      - MainVPC
+      - DefaultSecurityGroup      

@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet1
+      RouteTableId:
+        Ref: RouteTableForPublicSubnets
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet2
+      RouteTableId:
+        Ref: RouteTableForPublicSubnets       
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet1
+      RouteTableId:
+        Ref: RouteTableForPrivateSubnet1
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet2
+      RouteTableId:
+        Ref: RouteTableForPrivateSubnet2
+
+Parameters:
+  PublicSubnet1:
+    Description: Public Subnet 1 ID
+    Type: String
+  PublicSubnet2:
+    Description: Public Subnet 2 ID
+    Type: String
+  PrivateSubnet1:
+    Description: Private Subnet 1 ID
+    Type: String
+  PrivateSubnet2:
+    Description: Private Subnet 2 ID
+    Type: String 
+  RouteTableForPublicSubnets:
+    Description: Route Table For Public Subnet
+    Type: String
+  RouteTableForPrivateSubnet1:
+    Description: Route Table For Private Subnet 1
+    Type: String
+  RouteTableForPrivateSubnet2:
+    Description: Route Table For Private Subnet 2
+    Type: String
+
+Outputs:
+  PublicSubnet1RouteTableAssociation:
+    Description: Public Subnet1 RouteTable Association
+    Value: !Ref PublicSubnet1RouteTableAssociation  

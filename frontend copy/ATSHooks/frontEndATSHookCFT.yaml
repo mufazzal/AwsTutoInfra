@@ -1,0 +1,90 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  EC2WebsServerLaunchSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: !Ref CreateAndAttachMaintENILambdaArn
+          Protocol: "lambda"
+        - Endpoint: "h.mufazzal@gmail.com"
+          Protocol: "email"          
+      TopicName: "EC2WebsServerLaunchSNSTopic"  
+  EC2WebsServerTerminateSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: !Ref DeleteMaintENILambdaArn
+          Protocol: "lambda"
+        - Endpoint: "h.mufazzal@gmail.com"
+          Protocol: "email"          
+      TopicName: "EC2WebsServerTerminateSNSTopic"        
+
+  EC2LaunchHook: 
+    Type: AWS::AutoScaling::LifecycleHook
+    Properties: 
+      AutoScalingGroupName: 
+        Ref: ASG
+      LifecycleTransition: "autoscaling:EC2_INSTANCE_LAUNCHING"
+      DefaultResult: "CONTINUE"
+      HeartbeatTimeout: 120
+      NotificationTargetARN: 
+        Ref: EC2WebsServerLaunchSNSTopic
+      RoleARN: 
+        Fn::GetAtt: 
+          - ATSRoleForSNSAccess
+          - Arn
+  EC2TerminateHook: 
+    Type: AWS::AutoScaling::LifecycleHook
+    Properties: 
+      AutoScalingGroupName: 
+        Ref: ASG
+      LifecycleTransition: "autoscaling:EC2_INSTANCE_TERMINATING"
+      DefaultResult: "CONTINUE"
+      HeartbeatTimeout: 120      
+      NotificationTargetARN: 
+        Ref: EC2WebsServerTerminateSNSTopic
+      RoleARN: 
+        Fn::GetAtt: 
+          - ATSRoleForSNSAccess
+          - Arn
+
+  ATSRoleForSNSAccess:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - autoscaling.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: ATSRoleForSNSAccessPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: 'SNS:Publish'
+                Resource: 
+                  - Ref: EC2WebsServerLaunchSNSTopic
+                  - Ref: EC2WebsServerTerminateSNSTopic
+Parameters:
+  MufVPCID:
+    Type: 'AWS::EC2::VPC::Id'
+  CreateAndAttachMaintENILambdaArn:
+    Type: String
+  DeleteMaintENILambdaArn:
+    Type: String
+  ASG:
+    Type: String    
+
+Outputs:
+  RefEC2WebsServerLaunchSNSTopic:
+    Description: Ref of EC2WebsServerLaunchSNSTopic
+    Value: !Ref EC2WebsServerLaunchSNSTopic       
+  RefEC2WebsServerTerminateSNSTopic:
+      Description: Ref of EC2WebsServerTerminateSNSTopic
+      Value: !Ref EC2WebsServerTerminateSNSTopic      

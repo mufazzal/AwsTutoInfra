@@ -1,0 +1,99 @@
+service: ASGHookLambda
+provider:
+  name: aws
+  stage: ${opt:stage}
+  region: ${opt:region}
+  runtime: nodejs12.x
+  profile: ${opt:iamProfile}
+  stackName: ${opt:stackName}
+  role: ASGHookLambdaIAMRole
+  environment:
+    maintENISG:
+      ${opt:maintENISG}    
+    
+functions:
+  ASGLaunchHookLambda:
+    handler: ASGLaunchHookLambda/src/handler.handler
+    package:
+      include:
+       - ASGLaunchHookLambda/**     
+    iamRoleStatementsInherit: true
+    
+  ASGTerminateHookLambda:
+    handler: ASGTerminateHookLambda/src/handler.handler
+    package:
+      include:
+       - ASGTerminateHookLambda/**  
+    iamRoleStatementsInherit: true       
+  
+package:
+  individually: true
+  exclude:
+    - '*/**'
+
+resources:
+  Resources:
+    ResPolicyForLaunchHookLambda:
+      Type: "AWS::Lambda::Permission"
+      Properties: 
+        Action: lambda:InvokeFunction
+        FunctionName: 
+          Ref: ASGLaunchHookLambdaLambdaFunction
+        Principal: "sns.amazonaws.com"  
+    ResPolicyForTerminateHookLambda:
+      Type: "AWS::Lambda::Permission"
+      Properties: 
+        Action: lambda:InvokeFunction
+        FunctionName: 
+          Ref: ASGTerminateHookLambdaLambdaFunction
+        Principal: "sns.amazonaws.com"             
+    ASGHookLambdaIAMRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        RoleName: ASGHookLambdaIAMRole
+        Path: /
+        AssumeRolePolicyDocument: !Sub |
+          {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "lambda.amazonaws.com"
+                },
+                "Action": "sts:AssumeRole"
+              }]
+          }            
+        Policies:
+          - PolicyName: EC2WebServerIAMRolePolicy
+            PolicyDocument: !Sub |
+                {
+                  "Version": "2012-10-17",
+                  "Statement": [{
+                          "Action": [
+                              "logs:CreateLogGroup",
+                              "logs:CreateLogStream",
+                              "logs:PutLogEvents"
+                          ],
+                          "Effect": "Allow",
+                          "Resource": "arn:aws:logs:*:*:*"
+                      },{
+                          "Action": [
+                              "ec2:CreateNetworkInterface",
+                              "ec2:DescribeNetworkInterfaces",
+                              "ec2:DetachNetworkInterface",
+                              "ec2:DeleteNetworkInterface",
+                              "ec2:AttachNetworkInterface",
+                              "ec2:DescribeInstances",
+                              "ec2:CreateTags",
+                              "autoscaling:CompleteLifecycleAction"
+                          ],
+                          "Effect": "Allow",
+                          "Resource": "*"
+                      }]
+                }          
+    
+
+plugins:
+  - serverless-iam-roles-per-function
+  
+    

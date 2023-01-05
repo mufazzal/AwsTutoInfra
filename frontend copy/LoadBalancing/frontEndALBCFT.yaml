@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  LBTRG:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref MufVPCID
+      #URL HARD_CODING
+      HealthCheckPath: '/healthCheck.html'
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: e4f5012b-8ad6-487e-972f-4f73dbf21dc6
+  LBLIS:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      Port: 80
+      Protocol: HTTP
+      LoadBalancerArn: !Ref MALB
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref LBTRG
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 7872ed8e-6a4a-463f-b631-3186cb0ae731
+  MALB:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Properties:
+      Name: LBForEC2Webserver
+      SecurityGroups:
+        - !Ref ALBSG
+      Subnets: !Ref MufSubnetIdForWebServers
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: ce2f77ab-2340-4f5d-a084-33ff7d068236
+Parameters:
+  MufVPCID:
+    Type: 'AWS::EC2::VPC::Id'
+  ALBSG:
+    Type: String
+    Description: "SG for ALB"
+  MufSubnetIdForWebServers:
+    Type: CommaDelimitedList
+#    Type: 'List<AWS::EC2::Subnet::Id>'
+#    MinLength: 2
+    Description: >-
+      Select the Subnet for EC2 WebServer(This is behind LB so private subnet is
+      more secure)
+
+Outputs:
+  RefLBTRG:
+    Description: Ref of LBTRG
+    Value: !Ref LBTRG  
+  RefLBLIS:
+    Description: Ref of LBLIS
+    Value: !Ref LBLIS     
+  RefMALB:
+    Description: Ref of MALB
+    Value: !Ref MALB
+  ALBDNSNAme:
+    Description: DNS name of ALB
+    Value: !GetAtt
+      - MALB
+      - DNSName

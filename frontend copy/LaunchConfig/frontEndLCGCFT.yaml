@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  EC2LAunchConfig:
+    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Properties:
+      AssociatePublicIpAddress: true
+      ImageId: !FindInMap 
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - AMI
+      InstanceType: !Ref MufInstanceType
+      KeyName: !Ref MufKeyName
+      IamInstanceProfile: !Ref EC2WebServerIAMRole
+      SecurityGroups:
+        - !Ref EC2SG
+      UserData: 
+       Fn::Base64: !Sub | #Role name HARD_CODING
+          #!/bin/bash -xe
+          yum update -y aws-cfn-bootstrap 
+          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --configsets InstallMufApp --region ${AWS::Region} --resource EC2LAunchConfig --role FrontEnd-IAM-Stack-EC2WebServerIAMRole-1V7TFJ937M6VU
+    Metadata:
+      AWS::CloudFormation::Init: 
+        configSets:
+          InstallMufApp: ["InstallMufAppConfigSet"]
+        InstallMufAppConfigSet: 
+          packages: 
+            yum: 
+              httpd: []
+          files: 
+            "/home/ec2-user/initScriptOutput.txt": #File name HARD_CODING
+                content: !Sub 'This file is Generated from frontEndLCGCFT.yaml - ${AWS::StackId} - ${AWS::Region}'
+                mode  : "000600"
+                owner : "ec2-user"
+                group : "ec2-user"
+          commands: 
+            NodeDetail: #File name HARD_CODING
+              command: 'echo "HTTPD is running at: $(curl http://169.254.169.254/latest/meta-data/local-ipv4) - $(curl http://169.254.169.254/latest/meta-data/instance-id) - $(curl http://169.254.169.254/latest/meta-data/public-ipv4)" > nodeDetail.html'
+              cwd: "/var/www/html"
+            HealthCheck: #File name HARD_CODING
+              command: 'echo "OK" > healthCheck.html'
+              cwd: "/var/www/html"                  
+          services:
+            sysvinit:
+              httpd: 
+                enabled: true
+                ensureRunning: true
+      'AWS::CloudFormation::Designer':
+        id: c9902027-40b9-402e-9164-1d0f6f5ee1fe
+
+Parameters:
+  MufVPCID:
+    Type: 'AWS::EC2::VPC::Id'
+  MufInstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+    ConstraintDescription: must be a valid EC2 instance type.
+  MufKeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  EC2SG:
+    Type: String
+    Description: SG for the EC2 instances
+  EC2WebServerIAMRole:
+    Type: String
+  EC2WebServerIAMRoleName:
+    Type: String
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-0323c3dd2da7fb37d
+
+Outputs:
+  RefEC2LAunchConfig:
+    Description: Ref of EC2LAunchConfig
+    Value: !Ref EC2LAunchConfig

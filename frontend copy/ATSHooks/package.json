@@ -1,0 +1,22 @@
+{
+  "name": "frontEndATSHookStack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "node scripts/tasks deploy frontEnd-ATS-hook-Stack",
+    "update": "node scripts/tasks update frontEnd-ATS-hook-Stack",
+    "validate": "node scripts/tasks validate",
+    "pollEvent": "node scripts/tasks pollEvent frontEnd-ATS-hook-Stack",
+    "delete": "node scripts/tasks delete frontEnd-ATS-hook-Stack",
+    "listResource": "node scripts/tasks listResource frontEnd-ATS-hook-Stack",
+    "describe": "node scripts/tasks describe frontEnd-ATS-hook-Stack"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "moment": "^2.27.0"
+  }
+}

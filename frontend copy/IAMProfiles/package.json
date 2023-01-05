@@ -1,0 +1,22 @@
+{
+  "name": "FrontEndIAMStack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "node scripts/tasks deploy FrontEnd-IAM-Stack",
+    "update": "node scripts/tasks update FrontEnd-IAM-Stack",
+    "validate": "node scripts/tasks validate",
+    "pollEvent": "node scripts/tasks pollEvent FrontEnd-IAM-Stack",
+    "delete": "node scripts/tasks delete FrontEnd-IAM-Stack",
+    "listResource": "node scripts/tasks listResource FrontEnd-IAM-Stack",
+    "describe": "node scripts/tasks describe FrontEnd-IAM-Stack"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "child-process": "^1.0.2",
+    "moment": "^2.27.0"
+  }
+}

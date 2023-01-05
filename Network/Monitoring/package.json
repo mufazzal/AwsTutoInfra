@@ -1,0 +1,22 @@
+{
+  "name": "InfraMoniteringStack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "node scripts/tasks deploy Infra-Monitering-Stack",
+    "update": "node scripts/tasks update Infra-Monitering-Stack",
+    "validate": "node scripts/tasks validate",
+    "pollEvent": "node scripts/tasks pollEvent Infra-Monitering-Stack",
+    "delete": "node scripts/tasks delete Infra-Monitering-Stack",
+    "listResource": "node scripts/tasks listResource Infra-Monitering-Stack",
+    "describe": "node scripts/tasks describe Infra-Monitering-Stack"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "moment": "^2.27.0"
+  }
+}

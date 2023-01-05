@@ -1,0 +1,171 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+
+  S3BucketMainVPCLog:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref S3BucketNameMainVPCLog
+      AccessControl: PublicRead
+      LifecycleConfiguration:
+          Rules:
+            - Id: LogLifecycle
+              Status: 'Enabled'
+              Transition:
+                StorageClass: "GLACIER"
+                TransitionInDays: 7                
+              ExpirationInDays: 30
+  LogBucketPolicy:
+      Type: "AWS::S3::BucketPolicy"
+      Properties:
+        Bucket: !Ref S3BucketMainVPCLog
+        PolicyDocument: !Sub |
+            {
+              "Version": "2012-10-17",
+              "Statement": [{
+                  "Principal": { "Service": "delivery.logs.amazonaws.com" },                
+                  "Action": [ "s3:PutObject" ],
+                  "Effect": "Allow",
+                  "Resource": "${S3BucketMainVPCLog.Arn}/*"
+              }]
+            }           
+  MainVPCFlowLog:
+      Type: AWS::EC2::FlowLog
+      Properties: 
+        ResourceId: !Ref VPCID
+        ResourceType: VPC
+        TrafficType: ACCEPT
+        LogDestination: !GetAtt S3BucketMainVPCLog.Arn
+        LogDestinationType: s3
+        LogFormat: '${version} ${vpc-id} ${subnet-id} ${instance-id} ${srcaddr} ${dstaddr} ${srcport} ${dstport} ${protocol} ${tcp-flags} ${type} ${pkt-srcaddr} ${pkt-dstaddr}'
+
+#--------For subnet Log in Cloudwatch
+
+  LGPublicSubnet: 
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: 'PublicSubnet-logGroup'
+      RetentionInDays: 7
+  FLPublicSubet1:
+    Type: AWS::EC2::FlowLog
+    Properties: 
+      DeliverLogsPermissionArn: !GetAtt 
+        - LogDeliveryRole
+        - Arn
+      LogDestinationType: "cloud-watch-logs"
+      LogGroupName: !Ref LGPublicSubnet
+      ResourceId: !Ref PublicSubnet1
+      ResourceType: "Subnet"
+      TrafficType: "ALL"
+      #LogFormat!Ref LogFormat
+  FLPublicSubet2:
+    Type: AWS::EC2::FlowLog
+    Properties: 
+      DeliverLogsPermissionArn: !GetAtt 
+        - LogDeliveryRole
+        - Arn
+      LogDestinationType: "cloud-watch-logs"
+      LogGroupName: !Ref LGPublicSubnet
+      ResourceId: !Ref PublicSubnet2
+      ResourceType: "Subnet"
+      TrafficType: "ALL"            
+      #LogFormat!Ref LogFormat
+
+  LGPrivateSubnet: 
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: 'PrivateSubnet-logGroup'
+      RetentionInDays: 7
+  FLPrivateSubet1:
+    Type: AWS::EC2::FlowLog
+    Properties: 
+      DeliverLogsPermissionArn: !GetAtt 
+        - LogDeliveryRole
+        - Arn
+      LogDestinationType: "cloud-watch-logs"
+      LogGroupName: !Ref LGPrivateSubnet
+      ResourceId: !Ref PrivateSubnet1
+      ResourceType: "Subnet"
+      TrafficType: "ALL"
+      #LogFormat!Ref LogFormat
+  FLPrivateSubet2:
+    Type: AWS::EC2::FlowLog
+    Properties: 
+      DeliverLogsPermissionArn: !GetAtt 
+        - LogDeliveryRole
+        - Arn
+      LogDestinationType: "cloud-watch-logs"
+      LogGroupName: !Ref LGPrivateSubnet
+      ResourceId: !Ref PrivateSubnet2
+      ResourceType: "Subnet"
+      TrafficType: "ALL"            
+      #LogFormat!Ref LogFormat
+
+  LogDeliveryRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument: !Sub |
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "vpc-flow-logs.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        }           
+      Policies: 
+        - PolicyName: "CWAccessForLogCreation"
+          PolicyDocument: !Sub |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+                    "logs:DescribeLogGroups",
+                    "logs:DescribeLogStreams"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": "*"
+                }
+              ]
+            }             
+
+
+Parameters:
+  VPCID:
+    Description: VPC ID
+    Type: String    
+  S3BucketNameMainVPCLog:
+    Description: Bucket name for VPC log
+    Type: String
+  PublicSubnet1:
+    Description: Public Subnet 1
+    Type: String
+  PublicSubnet2:
+    Description: Public Subnet 2
+    Type: String    
+  PrivateSubnet1:
+    Description: Private Subnet 1
+    Type: String    
+  PrivateSubnet2:
+      Description: Private Subnet 2
+      Type: String        
+  LogFormat:
+      Description: LogFormat
+      Type: String        
+  
+Outputs:
+  RefLGPublicSubnet:
+    Description: LGPublicSubnet
+    Value: !Ref LGPublicSubnet
+  RefLGPrivateSubnet:
+    Description: LGPrivateSubnet
+    Value: !Ref LGPrivateSubnet    

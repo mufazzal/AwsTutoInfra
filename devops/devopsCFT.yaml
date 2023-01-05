@@ -285,6 +285,8 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: 0858a898-238f-4128-af5e-3eaf3d084a8d
+
+
 Outputs:
   RefAWSTutoDevopsUserGroup:
     Description: Ref of AWSTutoDevopsUserGroup
